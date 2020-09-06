@@ -19,6 +19,7 @@ class BaseModel(LightningModule, ABC):
         x, y_real = batch
         y_pred = self(x)
 
+        y_real, y_pred = y_real.view(-1), y_pred.view(-1)
         loss = F.smooth_l1_loss(y_pred, y_real)
         return loss
 
@@ -38,12 +39,8 @@ class BaseModel(LightningModule, ABC):
 
         return {'val_loss': total_loss, 'log': tensorboard_logs}
 
-    def prepare_data(self):
-        self.train_dataset = eval(f"{self.args.input_type}Dataset")(self.args.train_data_path)
-        self.val_dataset = eval(f"{self.args.input_type}Dataset")(self.args.val_data_path)
-
     def train_dataloader(self):
-        dataset = self.train_dataset
+        dataset = eval(f"{self.args.input_type}Dataset")(self.args.train_data_path)
         return DataLoader(
             dataset,
             batch_size=self.args.batch_size,
@@ -52,7 +49,7 @@ class BaseModel(LightningModule, ABC):
         )
 
     def val_dataloader(self):
-        dataset = self.val_dataset
+        dataset = eval(f"{self.args.input_type}Dataset")(self.args.val_data_path)
         return DataLoader(
             dataset,
             batch_size=self.args.batch_size,

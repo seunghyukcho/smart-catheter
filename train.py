@@ -20,7 +20,7 @@ class ArgParser(Tap):
     input_type: str = 'FCN'  # Model name
     nlayers: int = 3  # Number of layers
     nhids: int = 256  # Number of hidden cells
-    input_dim: int = 100  # Input dimension
+    input_dim: int = 300  # Input dimension
 
 
 if __name__ == "__main__":
