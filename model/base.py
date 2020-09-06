@@ -2,61 +2,55 @@ from abc import ABC
 
 import torch
 from torch.nn import functional as F
-from pytorch_lightning import LightningModule
+from pytorch_lightning import LightningModule, TrainResult, EvalResult
 from torch.utils.data import DataLoader
 
 from dataset import *
 
 
 class BaseModel(LightningModule, ABC):
-    def __init__(self, args):
+
+    def __init__(self, options):
         super().__init__()
         self.save_hyperparameters()
-        self.args = args
-        self.best_score = 1e9
-
-    def step(self, batch):
-        x, y_real = batch
-        y_pred = self(x)
-
-        y_real, y_pred = y_real.view(-1), y_pred.view(-1)
-        loss = F.smooth_l1_loss(y_pred, y_real)
-        return loss
+        self.options = options
 
     def training_step(self, batch, batch_idx):
-        loss = self.step(batch)
+        x, y_true = batch
+        y_pred, y_true = self(x).view(-1), y_true.view(-1)
+        loss = F.smooth_l1_loss(y_pred, y_true)
 
-        return {'loss': loss}
+        result = TrainResult(loss)
+        result.log("train_loss", loss, prog_bar=True)
+        return result
 
     def validation_step(self, batch, batch_idx):
-        loss = self.step(batch)
+        x, y_true = batch
+        y_pred, y_true = self(x).view(-1), y_true.view(-1)
+        loss = F.l1_loss(y_pred, y_true).data
 
-        return {'loss': loss}
-
-    def validation_epoch_end(self, outputs):
-        total_loss = torch.stack([x['loss'] for x in outputs]).mean()
-        tensorboard_logs = {'val_loss': total_loss}
-
-        return {'val_loss': total_loss, 'log': tensorboard_logs}
+        result = EvalResult(checkpoint_on=loss, early_stop_on=loss)
+        result.log("val_metric", loss, prog_bar=True)
+        return result
 
     def train_dataloader(self):
-        dataset = eval(f"{self.args.input_type}Dataset")(self.args.train_data_path)
+        dataset = eval(f"{self.options.input_type}Dataset")(self.options.train_data_path)
         return DataLoader(
             dataset,
-            batch_size=self.args.batch_size,
+            batch_size=self.options.batch_size,
             shuffle=True,
-            num_workers=self.args.cpu_workers
+            num_workers=self.options.cpu_workers
         )
 
     def val_dataloader(self):
-        dataset = eval(f"{self.args.input_type}Dataset")(self.args.val_data_path)
+        dataset = eval(f"{self.options.input_type}Dataset")(self.options.val_data_path)
         return DataLoader(
             dataset,
-            batch_size=self.args.batch_size,
+            batch_size=self.options.batch_size,
             shuffle=False,
-            num_workers=self.args.cpu_workers
+            num_workers=self.options.cpu_workers
         )
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.args.lr)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.options.lr)
         return optimizer

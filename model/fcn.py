@@ -8,10 +8,10 @@ class FCNModel(BaseModel):
     def __init__(self, args):
         super().__init__(args)
 
-        fcn = self.stack_linear_layers(self.args.nhids, self.args.nlayers)
-        self.encoder = nn.Linear(self.args.input_dim, self.args.nhids)
+        fcn = self.stack_linear_layers(self.options.nhids, self.options.nlayers)
+        self.encoder = nn.Linear(self.options.input_length * 3, self.options.nhids)
         self.fcn = nn.Sequential(*fcn)
-        self.decoder = nn.Linear(self.args.nhids, 1)
+        self.decoder = nn.Linear(self.options.nhids, 1)
         self.activation = nn.LeakyReLU()
 
     @staticmethod

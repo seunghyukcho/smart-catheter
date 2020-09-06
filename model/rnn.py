@@ -5,16 +5,15 @@ from .base import BaseModel
 
 class RNNModel(BaseModel):
 
-    def __init__(self, args):
-        super().__init__(args)
-
+    def __init__(self, options):
+        super().__init__(options)
         self.rnn = nn.GRU(
-            self.args.input_dim,
-            self.args.nhids,
-            self.args.nlayers,
+            self.options.input_length * 3,
+            self.options.nhids,
+            self.options.nlayers,
             batch_first=True
         )
-        self.decoder = nn.Linear(self.args.nhids, 1)
+        self.decoder = nn.Linear(self.options.nhids, 1)
         self.activation = nn.LeakyReLU()
 
     def forward(self, x):
