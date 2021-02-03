@@ -34,7 +34,7 @@ if __name__ == "__main__":
     torch.backends.cudnn.benchmark = False
 
     print('Loading train dataset...')
-    train_dataset = task_dataset(args, args.train_data, is_train=True)
+    train_dataset = task_dataset(args, args.train_data)
     train_loader = DataLoader(dataset=train_dataset, batch_size=args.batch_size, shuffle=True)
 
     print('Loading validation dataset...')
@@ -69,10 +69,6 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-        print(
-            f'Epoch: {epoch + 1} | Training   | '
-            f'Total Loss: {train_loss}'
-        )
 
         # Validation
         with torch.no_grad():
@@ -83,8 +79,9 @@ if __name__ == "__main__":
                 pred = model(x)
                 valid_loss += criterion(pred, y).item()
         print(
-            f'Epoch: {epoch + 1} | Validation | '
-            f'Total Loss: {valid_loss}'
+            f'Epoch: {epoch + 1} | '
+            f'Train Loss: {train_loss} | '
+            f'Validation Loss: {valid_loss}'
         )
 
         # Save tensorboard log
