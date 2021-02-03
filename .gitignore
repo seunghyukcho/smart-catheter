@@ -151,5 +151,4 @@ results/
 nohup.out
 checkpoints/
 scripts/
-
-lightning_logs
+logs/
