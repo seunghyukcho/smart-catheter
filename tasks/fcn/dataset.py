@@ -15,8 +15,8 @@ class Dataset(data.Dataset):
         self.input_len = args.input_len
         self.n_channel = args.n_channel
 
-        self.signals = np.load(f"{root_dir}/signals.npz")["arr_0"]
-        self.scales = np.load(f"{root_dir}/scales.npz")["arr_0"]
+        self.signals = np.load(f"{root_dir}/signals.npy").astype(np.float32)
+        self.scales = np.load(f"{root_dir}/scales.npy").astype(np.float32)
 
         self.signals = self.signals.reshape((-1, self.input_len * self.n_channel))
         self.scales = self.scales.reshape((-1, 1))
