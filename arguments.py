@@ -1,6 +1,6 @@
 import argparse
 
-tasks = ['fcn', 'rnn']
+tasks = ['fcn', 'rnn', 'transformer']
 
 
 def get_task_parser():
